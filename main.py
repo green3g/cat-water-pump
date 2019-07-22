@@ -16,9 +16,8 @@ import sdnotify
 
 SENSOR_PIN = 4
 TIMEOUT = 60
+HOST_IP = '192.168.0.159'
 
-device = TPLinkSmartPlug(host='192.168.0.159')
-pir = MotionSensor(SENSOR_PIN)
 
 from threading import Timer
 
@@ -77,7 +76,22 @@ class SmartPlugMotionDevice(object):
 			self.timer = None
 	
 if __name__ == '__main__':
+	
+	# initialization variables
+	initialized = False
+	device = None
+	pir = None
+	
 	print("Test starting up...")
+	while not initialized:
+		try:
+			device = TPLinkSmartPlug(host=HOST_IP)
+			initialized = True
+		except:
+			print('Network not up...')
+			sleep(1)
+	pir = MotionSensor(SENSOR_PIN)
+	
 	motion_device = SmartPlugMotionDevice(pir, device)
 	print("Test startup finished")
 
