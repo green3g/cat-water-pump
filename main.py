@@ -4,7 +4,8 @@ from gpiozero import MotionSensor
 from signal import pause
 from threading import Timer
 import subprocess
-from os import getpid
+from os import getpid	
+import sdnotify
 
 # Simple command
 #subprocess.call([
@@ -14,9 +15,9 @@ from os import getpid
 #	], shell=True)
 
 SENSOR_PIN = 4
-TIMEOUT = 5
+TIMEOUT = 60
 
-device = TPLinkSmartPlug(host='192.168.0.159', connect=True)
+device = TPLinkSmartPlug(host='192.168.0.159')
 pir = MotionSensor(SENSOR_PIN)
 
 from threading import Timer
@@ -50,16 +51,23 @@ class SmartPlugMotionDevice(object):
 	def activate(self):
 		print('Motion detected, activating device')
 		self.cancel()
+		self.device.connect()
 		self.device.turn_on()
+		self.device.close()
+		print('Device activated')
 		
 	def deactivate(self):
-		print('No motion, deactivating device')
+		print('No motion, setting deactivation timer')
 		self.timer = Timer(TIMEOUT, self._deactivate)
 		self.timer.start()
 		print(f'Timer started for {TIMEOUT} seconds')
 	
 	def _deactivate(self):
+		print('Deactivating device')
+		self.device.connect()
 		self.device.turn_off()
+		self.device.close()
+		print('Device deactivated');
 		self.timer = None
 		
 	def cancel(self):
@@ -69,10 +77,20 @@ class SmartPlugMotionDevice(object):
 			self.timer = None
 	
 if __name__ == '__main__':
+	print("Test starting up...")
 	motion_device = SmartPlugMotionDevice(pir, device)
-	
-	pause()
+	print("Test startup finished")
 
+	# Inform systemd that we've finished our startup sequence...
+	n = sdnotify.SystemdNotifier()
+	n.notify("READY=1")
+
+	count = 1
+	while True:
+		# print("Running... {}".format(count))
+		n.notify("STATUS=Count is {}".format(count))
+		count += 1
+		sleep(2)
 
 
 
