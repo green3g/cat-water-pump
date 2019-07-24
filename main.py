@@ -55,7 +55,10 @@ class SmartPlugMotionDevice(object):
 		self.device.close()
 		print('Device activated')
 		
-	def deactivate(self):
+	def deactivate(self, immediate=False):
+		if immediate:
+			self._deactivate()
+			return
 		print('No motion, setting deactivation timer')
 		self.timer = Timer(TIMEOUT, self._deactivate)
 		self.timer.start()
@@ -81,18 +84,26 @@ if __name__ == '__main__':
 	initialized = False
 	device = None
 	pir = None
+	motion_device = None
 	
 	print("Test starting up...")
+	pir = MotionSensor(SENSOR_PIN)
+	
 	while not initialized:
 		try:
 			device = TPLinkSmartPlug(host=HOST_IP)
+			motion_device = SmartPlugMotionDevice(pir, device)
+			print('Testing activation...')
+			motion_device.activate()
+			sleep(1)
+			print('Testing deactivation...')
+			motion_device.deactivate(immediate=True)
+			print('Test successful!')
 			initialized = True
 		except:
 			print('Network not up...')
 			sleep(1)
-	pir = MotionSensor(SENSOR_PIN)
 	
-	motion_device = SmartPlugMotionDevice(pir, device)
 	print("Test startup finished")
 
 	# Inform systemd that we've finished our startup sequence...
