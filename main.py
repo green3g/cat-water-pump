@@ -48,7 +48,7 @@ class SmartPlugMotionDevice(object):
 		pir.when_no_motion = self.deactivate
 
 	def activate(self):
-		print('Motion detected, activating device')
+		print('Activating device')
 		self.cancel()
 		self.device.connect()
 		self.device.turn_on()
@@ -59,7 +59,7 @@ class SmartPlugMotionDevice(object):
 		if immediate:
 			self._deactivate()
 			return
-		print('No motion, setting deactivation timer')
+		print('Setting deactivation timer')
 		self.timer = Timer(TIMEOUT, self._deactivate)
 		self.timer.start()
 		print(f'Timer started for {TIMEOUT} seconds')
