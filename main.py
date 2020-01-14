@@ -69,7 +69,7 @@ class SmartPlugMotionDevice(object):
 		self.device.connect()
 		self.device.turn_off()
 		self.device.close()
-		print('Device deactivated');
+		print('Device deactivated')
 		self.timer = None
 		
 	def cancel(self):
